@@ -29,5 +29,5 @@ getway:网关服务器
 加上学会使用sh批处理文件
 
 ### 第三天
-* logo日志的操作
-* tcp/websocket的基础操作
+* logo日志的操作（完成）
+* tcp/websocket的基础操作（完成）
