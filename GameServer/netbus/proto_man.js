@@ -7,6 +7,12 @@ body 消息结构
 var log = require('../uitl/log.js');
 var netbus = require('./netbus.js');
 
+var proto_man = {
+    PROTO_JSON:1, 
+    PROTO_BUF:2, 
+    encode_cmd:encode_cmd, 
+    decode_cmd:decode_cmd,
+}
 
 
 var proto_man = {};
@@ -60,7 +66,7 @@ function get_key(stype,ctype){
  */
 function encode_cmd(proto_type,stype,ctype,body){
     var buf = null;
-    if(proto_type == netbus.PROTO_JSON){
+    if(proto_type == proto_man.PROTO_JSON){
         buf = _json_encode(stype,ctype,body);
     }
 
@@ -79,12 +85,9 @@ function encode_cmd(proto_type,stype,ctype,body){
 function decode_cmd(proto_type,str_of_buf){
     //解密
     str_of_buf = decrypt_cmd(str_of_buf);
-    if(proto_type == netbus.PROTO_JSON){
-        return json_encode(str_of_buf);
+    if(proto_type == proto_man.PROTO_JSON){
+        return _json_encode(str_of_buf);
     }
 }
-
-proto_man.encode_cmd = encode_cmd;
-proto_man.decode_cmd = decode_cmd;
 
 module.exports = proto_man;

@@ -1,7 +1,8 @@
-var log = require('../uitl/log.js');
 var net = require('net');
 var ws = require('ws');
-
+var log = require('../uitl/log.js');
+var proto_man = require('./proto_man.js');
+var service_manager = require("./service_manager.js");
 
 var global_session_list = {};//全局的客户端列表
 var global_session_key = 1; //关键操作
@@ -40,6 +41,8 @@ function on_session_enter(session,proto_type,is_ws){
 //推出操作
 function on_session_exit(session) {
     log.info("session exit");
+	service_manager.on_client_lost_connect(session);
+
     session.last_pag = null;//记录上一次的数据操作的
     if(global_session_list[session.session_key]) {
         global_session_list[session.session] = null;
@@ -61,7 +64,10 @@ function session_close(session){
 // 如果是json协议 str_or_buf json字符串;
 // 如果是buf协议 str_or_buf Buffer对象;
 function on_session_recv_cmd(session, str_or_buf) {
-	log.info(str_or_buf);
+	// log.info(str_or_buf);
+	if(!service_manager.on_recv_client_cmd(session, str_or_buf)){
+		session_close();
+	}
 }
 
 // 发送命令
@@ -97,20 +103,16 @@ function add_client_session_event(session,proto_type){
 		else {
 			last_pkg = data;	
 		}
-
 		var offset = 0;
 		var pkg_len = tcppkg.read_pkg_size(last_pkg, offset);
 		if (pkg_len < 0) {
 			return;
 		}
-
 		while(offset + pkg_len <= last_pkg.length) { // 判断是否有完整的包;
 			// 根据长度信息来读取我们的数据,架设我们穿过来的是文本数据
 			var cmd_buf; 
-
-
 			// 收到了一个完整的数据包
-			if (session.proto_type == netbus.PROTO_JSON) {
+			if (session.proto_type == proto_man.PROTO_JSON) {
 				var json_str = last_pkg.toString("utf8", offset + 2, offset + pkg_len);
 				if (!json_str) {
 					session_close(session);
@@ -124,7 +126,6 @@ function add_client_session_event(session,proto_type){
 				on_session_recv_cmd(session, cmd_buf);	
 			}
 			
-
 			offset += pkg_len;
 			if (offset >= last_pkg.length) { // 正好我们的包处理完了;
 				break;
@@ -197,7 +198,7 @@ function ws_add_client_session_event(session, proto_type) {
 	// end 
 
 	session.on("message", function(data) {
-		if (session.proto_type == netbus.PROTO_JSON) {
+		if (session.proto_type == proto_man.PROTO_JSON) {
             log.info("data is ",typeof data)
 			if (!isString(data)) {
                 log.error("ws:message is not string");
@@ -216,12 +217,15 @@ function ws_add_client_session_event(session, proto_type) {
 		}
 	});
 	// end
-
 	on_session_enter(session, proto_type, true); 
 }
 
 function start_ws_server(ip, port, proto_type) {
 	log.info("start ws server ..", ip, port);
+	var str_proto = {
+		1:"PROTO_JSON",
+		2:"PROTO_BUF",
+	}
 	var server = new ws.Server({
 		host: ip,
 		port: port,
@@ -243,11 +247,12 @@ function start_ws_server(ip, port, proto_type) {
 	server.on("close", on_server_listen_close);
 }
 
-netbus.start_tcp_server = start_tcp_server;
-netbus.start_ws_server = start_ws_server;
-
-netbus.session_send = session_send;
-netbus.session_close = session_close;
+var netbus = {
+	start_tcp_server : start_tcp_server,
+	start_ws_server : start_ws_server,
+	session_send : session_send,
+	session_close : session_close
+}
 
 module.exports = netbus;
 
