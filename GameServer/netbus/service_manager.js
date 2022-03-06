@@ -1,3 +1,4 @@
+const { info } = require('../uitl/log.js');
 var log = require('../uitl/log.js');
 var proto_man = require('./proto_man.js');
 
@@ -19,10 +20,13 @@ function on_recv_client_cmd(session,str_or_buf){
     }
 
     var stype,ctype,body;
-    stype = cmd[0];
-    ctype = cmd[1];
-    body = cmd[2];
+    stype = cmd['stype'];
+    ctype = cmd['ctype'];
+    body = cmd['body'];
+    log.error("============="+cmd['stype']);
+    
     if(service_modules[stype]){
+        
         service_modules[stype].on_recv_player_cmd(session,ctype,body);
     }
     return true;

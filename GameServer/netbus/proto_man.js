@@ -37,14 +37,11 @@ function _json_encode(stype,ctype,body){
 //json解码
 function json_decode(cmd_json){
     let cmd = null;
-    try {
-        cmd = JSON.parse(cmd_json);
-    } catch (error) {   
-    }
+    cmd = JSON.parse(cmd_json);
     if (!cmd || 
-		typeof(cmd[0])=="undefined" ||
-		typeof(cmd[1])=="undefined" ||
-		typeof(cmd[2])=="undefined") {
+		typeof(cmd['stype'])=="undefined" ||
+		typeof(cmd['ctype'])=="undefined" ||
+		typeof(cmd['body'])=="undefined") {
 		return null;
 	}
     return cmd;
@@ -83,6 +80,7 @@ function decode_cmd(proto_type,str_of_buf){
     //解密
     str_of_buf = decrypt_cmd(str_of_buf);
     if(proto_type == proto_man.PROTO_JSON){
+        log.info("=============="+json_decode(str_of_buf))
         return json_decode(str_of_buf);
     }
 }

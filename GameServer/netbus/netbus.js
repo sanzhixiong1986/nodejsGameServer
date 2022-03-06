@@ -64,6 +64,7 @@ function session_close(session){
 // 如果是json协议 str_or_buf json字符串;
 // 如果是buf协议 str_or_buf Buffer对象;
 function on_session_recv_cmd(session, str_or_buf) {
+	log.info("on_session_recv_cmd"+str_or_buf);
 	if(!service_manager.on_recv_client_cmd(session, str_or_buf)){
 		log.error("on_session_recv_cmd is error");
 		session_close();
