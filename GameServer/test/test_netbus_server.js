@@ -1,7 +1,7 @@
 var netbus = require("../netbus/netbus.js");
+var proto_man = require("../netbus/proto_man.js");
+var service_manager = require("../netbus/service_manager.js");
+var talk_room = require("./talk_room");
+netbus.start_ws_server("127.0.0.1", 6081, proto_man.PROTO_JSON);
 
-
-//netbus.start_tcp_server("127.0.0.1", 6080, netbus.PROTO_BUF);
-// netbus.start_tcp_server("127.0.0.1", 6080, netbus.PROTO_JSON);
- netbus.start_ws_server("127.0.0.1", 6081, netbus.PROTO_JSON);
-//netbus.start_ws_server("127.0.0.1", 6081, netbus.PROTO_BUF);
+service_manager.register_service(1, talk_room);

@@ -22,7 +22,6 @@ function on_recv_client_cmd(session,str_or_buf){
     stype = cmd[0];
     ctype = cmd[1];
     body = cmd[2];
-
     if(service_modules[stype]){
         service_modules[stype].on_recv_player_cmd(session,ctype,body);
     }

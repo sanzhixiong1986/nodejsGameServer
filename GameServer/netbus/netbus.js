@@ -64,8 +64,8 @@ function session_close(session){
 // 如果是json协议 str_or_buf json字符串;
 // 如果是buf协议 str_or_buf Buffer对象;
 function on_session_recv_cmd(session, str_or_buf) {
-	// log.info(str_or_buf);
 	if(!service_manager.on_recv_client_cmd(session, str_or_buf)){
+		log.error("on_session_recv_cmd is error");
 		session_close();
 	}
 }
@@ -183,7 +183,7 @@ function start_tcp_server(ip,prot,proto_type){
 
 // -------------------------
 function isString(str){ //判断对象是否是字符串  
-	return JSON.parse(str);  
+	return false; 
 }  
 
 function ws_add_client_session_event(session, proto_type) {
@@ -200,12 +200,11 @@ function ws_add_client_session_event(session, proto_type) {
 	session.on("message", function(data) {
 		if (session.proto_type == proto_man.PROTO_JSON) {
             log.info("data is ",typeof data)
-			if (!isString(data)) {
-                log.error("ws:message is not string");
-				session_close(session);
-				return;
-			}
-            log.info("ws:messgae is result"+ data.toString());
+			// if (!isString(data)) {
+            //     log.error("ws:message is not string");
+			// 	session_close(session);
+			// 	return;
+			// }
 			on_session_recv_cmd(session, data);
 		}
 		else {

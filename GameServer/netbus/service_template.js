@@ -1,3 +1,5 @@
+var log = require('../uitl/log.js');
+
 var service = {
     stype:1,//服务器号码
     name:"service tempalte",
@@ -5,6 +7,8 @@ var service = {
 
     //每个服务收到数据的跳用
     on_recv_player_cmd(session,ctype,body){
+        log.info("on_recv_player_cmd=ctype",ctype)
+        log.info("on_recv_player_cmd=body",body)
     },
 
     //每个服务器连接丢失的时候，被动丢失连接

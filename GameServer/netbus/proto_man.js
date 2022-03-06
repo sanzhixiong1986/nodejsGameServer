@@ -8,14 +8,11 @@ var log = require('../uitl/log.js');
 var netbus = require('./netbus.js');
 
 var proto_man = {
-    PROTO_JSON:1, 
-    PROTO_BUF:2, 
-    encode_cmd:encode_cmd, 
-    decode_cmd:decode_cmd,
-}
-
-
-var proto_man = {};
+	PROTO_JSON: 1,  
+	PROTO_BUF: 2,
+	encode_cmd: encode_cmd,
+	decode_cmd: decode_cmd,
+};
 
 //加密
 function encrypt_cmd(str_of_buf) {
@@ -86,7 +83,7 @@ function decode_cmd(proto_type,str_of_buf){
     //解密
     str_of_buf = decrypt_cmd(str_of_buf);
     if(proto_type == proto_man.PROTO_JSON){
-        return _json_encode(str_of_buf);
+        return json_decode(str_of_buf);
     }
 }
 
