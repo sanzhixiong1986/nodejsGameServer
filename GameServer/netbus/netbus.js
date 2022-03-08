@@ -31,11 +31,39 @@ function on_session_enter(session,proto_type,is_ws){
     session.last_pkg = null; // 表示我们存储的上一次没有处理完的TCP包;
 	session.is_ws = is_ws;
 	session.proto_type = proto_type;
+	session.is_connected = true; //客户端已经连接上服务器了socket
+
+	//对session的扩展内置函数
+	session.send_encoded_cmd = session_send_encoded_cmd;
+	session.send_cmd = session_send_cmd;
 
     global_session_list[global_session_key] = session;
     session.session_key = global_session_key;
     global_session_key++;
     //end
+}
+
+//发送命令
+function session_send_encoded_cmd(cmd){
+	//没有连接上就不能发送消息
+	if(!this.is_connected){
+		return;
+	}
+	//如果是websocket操作
+	if(this.is_ws){
+		this.send(cmd);
+	}
+}
+
+function session_send_cmd(stype,ctype,body){
+	if(!this.is_connected){
+		return;
+	}
+	var cmd = null;
+	cmd = proto_man.encode_cmd(this.proto_type,stype,ctype,body);
+	if(cmd){
+		this.send_encoded_cmd(cmd);
+	}
 }
 
 //推出操作
@@ -55,6 +83,7 @@ function on_session_exit(session) {
 function session_close(session){
     if(!session.is_ws){
         session.end();
+		return;
     }else{
         session.close();
     }
@@ -87,6 +116,7 @@ function session_send(session, cmd) {
 function add_client_session_event(session,proto_type){
     session.on('close', function(){
         on_session_exit();
+		session.end();
     })
 
     //正常介入到数据
@@ -161,6 +191,11 @@ function add_client_session_event(session,proto_type){
 //开始的tcp服务
 function start_tcp_server(ip,prot,proto_type){
     log.info("start tcp server...",ip,port);
+	var str_proto = {
+		1:"PROTO_JSON",
+		2:"PROTO_BUF"
+	}
+	log.info("start tcp server...",ip,port,str_proto[proto_type]);
     //创建tcpserver
     var server = net.createServer(function(client_sock){
         add_client_session_event(client_sock,proto_type);
@@ -191,6 +226,7 @@ function ws_add_client_session_event(session, proto_type) {
 	// close事件
 	session.on("close", function() {
 		on_session_exit(session);
+		session.close();
 	});
 
 	// error事件
@@ -250,7 +286,7 @@ function start_ws_server(ip, port, proto_type) {
 var netbus = {
 	start_tcp_server : start_tcp_server,
 	start_ws_server : start_ws_server,
-	session_send : session_send,
+	// session_send : session_send,
 	session_close : session_close
 }
 
