@@ -29,9 +29,9 @@ function decrypt_cmd(str_of_buf) {
 //json编码
 function _json_encode(stype,ctype,body){
     var cmd = {};
-    cmd[0] = stype;
-    cmd[1] = ctype;
-    cmd[2] = body;
+    cmd['stype'] = stype;
+    cmd['ctype'] = ctype;
+    cmd['body'] = body;
     var str = JSON.stringify(cmd);
     return str;
 }

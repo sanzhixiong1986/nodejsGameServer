@@ -1,6 +1,8 @@
 var log = require("../uitl/log.js");
 var proto_man = require("../netbus/proto_man.js");
 
+
+
 var service = {
 	stype: 1, // 服务号
 	name: "talk room", // 服务名称

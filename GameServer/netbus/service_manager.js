@@ -13,6 +13,12 @@ function register_service(stype, service){
     service.init();
 }
 
+/**
+ * 收到客户端来的信息
+ * @param {*} session       客户端的引用
+ * @param {*} str_or_buf    客户端的数据
+ * @returns 
+ */
 function on_recv_client_cmd(session,str_or_buf){
     var cmd = proto_man.decode_cmd(session.proto_type,str_or_buf);
     if(!cmd){
@@ -23,7 +29,6 @@ function on_recv_client_cmd(session,str_or_buf){
     stype = cmd['stype'];
     ctype = cmd['ctype'];
     body = cmd['body'];
-    log.error("============="+cmd['stype']);
     
     if(service_modules[stype]){
         
