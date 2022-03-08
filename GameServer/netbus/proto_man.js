@@ -12,6 +12,8 @@ var proto_man = {
 	PROTO_BUF: 2,
 	encode_cmd: encode_cmd,
 	decode_cmd: decode_cmd,
+    encrypt_cmd:encrypt_cmd,
+    decrypt_cmd:decrypt_cmd
 };
 
 //加密
@@ -80,7 +82,6 @@ function decode_cmd(proto_type,str_of_buf){
     //解密
     str_of_buf = decrypt_cmd(str_of_buf);
     if(proto_type == proto_man.PROTO_JSON){
-        log.info("=============="+json_decode(str_of_buf))
         return json_decode(str_of_buf);
     }
 }
