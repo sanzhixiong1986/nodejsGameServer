@@ -40,7 +40,7 @@ function on_recv_client_cmd(session,str_or_buf){
 //玩家掉线就走这里
 function on_client_lost_connect(session){
    for(var key in service_modules){
-       service_models[key].on_player_disconnect(session);
+    service_modules[key].on_player_disconnect(session);
    }
 }
 

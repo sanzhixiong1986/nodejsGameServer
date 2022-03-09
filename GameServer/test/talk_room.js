@@ -9,7 +9,7 @@ var TalkCmd = {
 	Enter: 1, 		// 用户进入
 	Exit: 2, 		//用户离开
 	UserArrived: 3, 	//别的用户进来
-	UserEixt: 4, 	//别人离开
+	UserExit: 4, 	//别人离开
 	SendMsg: 5, //自己发送消息
 	UserMsg: 6, //收到别人的发送消息
 }
@@ -67,7 +67,9 @@ function on_user_exit_room(session, is_lost_connect) {
 	}
 
 	//广播到所有人有人离开
-	broadcast_cmd(TalkCmd.UserEixt, room[session.session_key].info, session);
+	// 把我们进来的消息广播给其他的人
+	broadcast_cmd(TalkCmd.UserExit, room[session.session_key].uinfo, session);
+	// end 
 
 	//列表中要删除
 	room[session.session_key] = null;
@@ -146,7 +148,7 @@ var service = {
 		//收到消息进行判断
 		switch (ctype) {
 			case TalkCmd.Enter:
-				on_user_enter_room(session, body);
+				on_user_enter_talkroom(session, body);
 				break;
 			case TalkCmd.Exit://主动离开房间（重点）
 				on_user_exit_room(session, false);
