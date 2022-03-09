@@ -77,7 +77,7 @@ function on_user_exit_room(session, is_lost_connect) {
 	//end
 
 	if (!is_lost_connect) {
-		session.send_cmd(STYPE_TALKROOM, TalkCmd.Exit, Respones.ok);
+		session.send_cmd(STYPE_TALKROOM, TalkCmd.Exit, Response.ok);
 	}
 }
 
@@ -144,7 +144,6 @@ var service = {
 
 	// 每个服务收到数据的时候调用
 	on_recv_player_cmd: function (session, ctype, body) {
-		log.info(this.name + " on_recv_player_cmd: ", ctype, body);
 		//收到消息进行判断
 		switch (ctype) {
 			case TalkCmd.Enter:
