@@ -43,7 +43,7 @@ function on_user_enter_talkroom(session, body) {
 
 	//所有的聊天发送给刚来的人
 	for (var key in room) {
-		session.send_cmd(STYPE_TALKROOM, TalkCmd.UserArrived, room[key].info);
+		session.send_cmd(STYPE_TALKROOM, TalkCmd.UserArrived, room[key]);
 	}
 
 	//保存玩家信息
@@ -67,9 +67,9 @@ function on_user_exit_room(session, is_lost_connect) {
 	}
 
 	//广播到所有人有人离开
-	// 把我们进来的消息广播给其他的人
-	broadcast_cmd(TalkCmd.UserExit, room[session.session_key].uinfo, session);
-	// end 
+	//把我们进来的消息广播给其他的人
+	broadcast_cmd(TalkCmd.UserExit, room[session.session_key], session);
+	//end 
 
 	//列表中要删除
 	room[session.session_key] = null;
@@ -89,22 +89,22 @@ function on_user_exit_room(session, is_lost_connect) {
 function on_user_send_msg(session, body){
 	if(!room[session.session_key]){
 		session.send_cmd(STYPE_TALKROOM, TalkCmd.SendMsg, {
-			0: Respones.INVALD_OPT,
+			0: Response.INVALD_OPT,
 		});
 		return;
 	}
 
 	session.send_cmd(STYPE_TALKROOM, TalkCmd.SendMsg,{
-		"state":Respones.ok,
-		"uname":room[session.session_key].info.uname,
-		"sex":room[session.session_key].info.sex,
+		"status":Response.ok,
+		"uname":room[session.session_key].uinfo.uname,
+		"sex":room[session.session_key].uinfo.usex,
 		"msg":body,
 	})
 
 	//转发
 	broadcast_cmd(TalkCmd.UserMsg,{
-		"uname":room[session.session_key].info.uname,
-		"usex":room[session.session_key].info.usex,
+		"uname":room[session.session_key].uname,
+		"usex":room[session.session_key].usex,
 		"msg":body,
 	})
 }
