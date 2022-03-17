@@ -284,11 +284,100 @@ function start_ws_server(ip, port, proto_type, is_encrypt) {
 	server.on("close", on_server_listen_close);
 }
 
+function on_session_disconnect(session) {
+	session.is_connected = false;
+	var stype = session.session_key;
+	session.last_pkg = null;
+	session.session_key = null;
+	if (server_connect_list[stype]) {
+		server_connect_list[stype] = null;
+		delete server_connect_list[stype]; // 把这个key, value从 {}里面删除	
+	}
+}
+var session_wb = null;
+/**
+ * 链接服务器
+ * @param {*} stype 服务器的类型 
+ * @param {*} host 
+ * @param {*} port 
+ * @param {*} proto_type 
+ * @param {*} is_encrypt 
+ */
+function connect_ws_server(stype, host, port, proto_type, is_encrypt) {
+
+	var str_proto = {
+		1: "PROTO_JSON",
+		2: "PROTO_BUF",
+	}
+
+	var sock = new ws("ws://"+host + ":" + port);
+	sock.is_connected = false;
+	sock.on("open", function () {
+		on_session_connected(stype, sock, port, proto_type, true, is_encrypt);
+	});
+
+	sock.on("error", function (err) {
+		console.log("error: ", err);
+	});
+
+	sock.on("close", function () {
+		console.log("close");
+		if (sock.is_connected === true) {
+			on_session_disconnect(sock);
+		}
+		sock.close();
+
+		setTimeout(function () {
+			connect_ws_server(stype, host, port, proto_type, is_encrypt)
+		}, 3000);
+	});
+
+	sock.on("message", function (data) {
+		console.log(data);
+		if (sock.proto_type == proto_man.PROTO_JSON) {
+			log.info("data is ", typeof data)
+			on_session_recv_cmd(session, data);
+		}
+	});
+}
+
+function on_session_recv_cmd(session, str_or_buf) {
+	if (!service_manager.on_recv_server_return(session, str_or_buf)) {
+		session_close(session);
+	}
+}
+//加入列表
+var server_connect_list = {};
+function on_session_connected(stype, session, proto_type, is_ws, is_encrypt) {
+	if (is_ws) {
+		log.info("session connect:", session._socket.remoteAddress, session._socket.remotePort);
+	}
+	else {
+		log.info("session connect:", session.remoteAddress, session.remotePort);
+	}
+
+	session.last_pkg = null; // 表示我们存储的上一次没有处理完的TCP包;
+	session.is_ws = is_ws;
+	session.proto_type = proto_type;
+	session.is_connected = true;
+	session.is_encrypt = is_encrypt;
+
+	// 扩展session的方法
+	session.send_encoded_cmd = session_send_encoded_cmd;
+	session.send_cmd = session_send_cmd;
+	// end 
+
+	// 加入到我们的serssion 列表里面
+	server_connect_list[stype] = session;
+	session.session_key = stype;
+}
+
 var netbus = {
 	start_tcp_server: start_tcp_server,
 	start_ws_server: start_ws_server,
 	// session_send : session_send,
-	session_close: session_close
+	session_close: session_close,
+	connect_ws_server: connect_ws_server,
 }
 
 module.exports = netbus;
