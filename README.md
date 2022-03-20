@@ -31,3 +31,8 @@ getway:网关服务器
 ### 第三天
 * logo日志的操作（完成）
 * tcp/websocket的基础操作（完成）
+
+
+###  getway转发功能实现
+* getway基础功能实现
+* getway转发功能实现
