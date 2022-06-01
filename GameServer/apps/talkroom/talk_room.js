@@ -1,5 +1,5 @@
-var log = require("../uitl/log.js");
-var proto_man = require("../netbus/proto_man.js");
+var log = require("../../uitl/log");
+var proto_man = require("../../netbus/proto_man.js");
 
 const STYPE_TALKROOM = 1;//作为主服务器的id号，1号服务器是聊天
 const STYPE_NAMES = "talk room";
@@ -25,14 +25,14 @@ var Response = {
 
 //用户进来
 var room = {};//对用户进行管理
-function on_user_enter_talkroom(session, body) {
+function on_user_enter_talkroom(session, body, utag, proto_type) {
 	//对数据进行判断出错的可能性
 	if (typeof (body.uname) == "undefined" || typeof (body.usex) == "undefined") {
 		session.send_cmd(STYPE_TALKROOM, TalkCmd.Enter, Response.INVALID_PARAMS);
 		return;
 	}
 	//判断是否在房间
-	if (room[session.session_key]) {
+	if (room[utag]) {
 		session.send_cmd(STYPE_TALKROOM, TalkCmd.Enter, Response.IS_IN_TALKROOM);
 		return;
 	}
@@ -49,9 +49,11 @@ function on_user_enter_talkroom(session, body) {
 	//保存玩家信息
 	var talkman = {
 		session: session,
+		utag:utag,
+		proto_type:proto_type,
 		uinfo: body,
 	}
-	room[session.session_key] = talkman;
+	room[utag] = talkman;
 }
 
 /**
@@ -59,7 +61,7 @@ function on_user_enter_talkroom(session, body) {
  * @param {*} session			客户端的session 
  * @param {*} is_lost_connect 	是否是主动离开
  */
-function on_user_exit_room(session, is_lost_connect) {
+function on_user_exit_room(session, is_lost_connect, utag, proto_type) {
 	//我不在聊天室
 	if (!room[session.session_key] && !is_lost_connect) {
 		session.send_cmd(STYPE_TALKROOM, TalkCmd.Exit, Respones.NOT_IN_TALKROOM);
@@ -143,18 +145,21 @@ var service = {
 	},
 
 	// 每个服务收到数据的时候调用
-	on_recv_player_cmd: function (session, ctype, body) {
+	on_recv_player_cmd: function (session, stype, ctype, body, utag, proto_type, raw_cmd) {
 		//收到消息进行判断
 		switch (ctype) {
 			case TalkCmd.Enter:
-				on_user_enter_talkroom(session, body);
+				on_user_enter_talkroom(session, body, utag, proto_type);
 				break;
 			case TalkCmd.Exit://主动离开房间（重点）
-				on_user_exit_room(session, false);
+				on_user_exit_room(session, false, utag, proto_type);
 				break;
 			case TalkCmd.SendMsg:
 				on_user_send_msg(session, body);
 				break;
+			case proto_man.GW_Disconnect: // 网关转发过来，用户被迫掉线
+				on_user_exit_room(session, true, utag, proto_type);
+			break;
 		}
 		var cmd_buf = proto_man.encode_cmd(proto_man.PROTO_JSON, 1, 2, "Hello Talk room from ws!!!");
 		session.send(STYPE_TALKROOM,);

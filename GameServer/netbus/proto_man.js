@@ -10,6 +10,8 @@ var netbus = require('./netbus.js');
 var proto_man = {
 	PROTO_JSON: 1,  
 	PROTO_BUF: 2,
+    GW_Disconnect: 10000,//全局的命令
+    
 	encode_cmd: encode_cmd,
 	decode_cmd: decode_cmd,
     encrypt_cmd:encrypt_cmd,

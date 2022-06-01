@@ -15,11 +15,11 @@ var game_config = {
             host: "127.0.0.1",
             port: 6084,
         },
-        1: {
-            stype: Stype.Auth,
-            host: "127.0.0.1",
-            port: 6085,
-        }
+        // 1: {
+        //     stype: Stype.Auth,
+        //     host: "127.0.0.1",
+        //     port: 6085,
+        // }
     }
 }
 

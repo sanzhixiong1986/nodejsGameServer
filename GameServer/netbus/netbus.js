@@ -74,6 +74,10 @@ function session_send_cmd(stype, ctype, body) {
 	}
 }
 
+function get_client_session(session_key) {
+	return global_session_list[session_key];
+}
+
 //推出操作
 function on_session_exit(session) {
 	log.info("session exit");
@@ -310,7 +314,7 @@ function connect_ws_server(stype, host, port, proto_type, is_encrypt) {
 		2: "PROTO_BUF",
 	}
 
-	var sock = new ws("ws://"+host + ":" + port);
+	var sock = new ws("ws://" + host + ":" + port);
 	sock.is_connected = false;
 	sock.on("open", function () {
 		on_session_connected(stype, sock, port, proto_type, true, is_encrypt);
@@ -372,12 +376,18 @@ function on_session_connected(stype, session, proto_type, is_ws, is_encrypt) {
 	session.session_key = stype;
 }
 
+function get_server_session(stype) {
+	return server_connect_list[stype];
+}
+
 var netbus = {
 	start_tcp_server: start_tcp_server,
 	start_ws_server: start_ws_server,
 	// session_send : session_send,
 	session_close: session_close,
 	connect_ws_server: connect_ws_server,
+	get_client_session: get_client_session,
+	get_server_session:get_server_session,
 }
 
 module.exports = netbus;

@@ -20,4 +20,5 @@ netbus.start_ws_server(host, ports[1], proto_man.PROTO_JSON, true);
 var game_server = game_config.game_server;
 for (var key in game_server) {
     netbus.connect_ws_server(game_server[key].stype, game_server[key].host, game_server[key].port, proto_man.PROTO_JSON, false);
+    service_manager.register_service(game_server[key].stype, gw_service);
 }
